@@ -137,6 +137,24 @@
     ::placeholder {
       color: #aaa;
     }
+
+    /* Add this to your existing styles */
+    #logTable {
+      display: none;
+      margin-top: 30px;
+      border-collapse: collapse;
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 20px rgba(0, 239, 166, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      width: 800px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -242,6 +260,8 @@
     }
     function drawGraph() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Step 1: First draw all regular edges (lines only)
       for (let edge of edges) {
         const fromNode = nodes[edge.from];
         const toNode = nodes[edge.to];
@@ -256,21 +276,9 @@
         ctx.strokeStyle = gradient;
         ctx.lineWidth = 5;
         ctx.stroke();
-        const midX = (fromNode.x + toNode.x) / 2;
-        const midY = (fromNode.y + toNode.y) / 2;
-        ctx.beginPath();
-        ctx.arc(midX, midY, 14, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-        ctx.fill();
-        ctx.shadowColor = "#00efa6";
-        ctx.shadowBlur = 5;
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = "bold 14px sans-serif";
-        ctx.fillText(edge.weight, midX, midY);
-        ctx.shadowBlur = 0;
       }
+      
+      // Step 2: Draw all MST edges (lines only)
       for (let edge of mstEdges) {
         const fromNode = nodes[edge.from];
         const toNode = nodes[edge.to];
@@ -288,6 +296,32 @@
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
+      
+      // Step 3: Draw all weight labels (on top of lines)
+      for (let edge of edges) {
+        const fromNode = nodes[edge.from];
+        const toNode = nodes[edge.to];
+        const midX = (fromNode.x + toNode.x) / 2;
+        const midY = (fromNode.y + toNode.y) / 2;
+        
+        // Draw weight background for better readability
+        ctx.beginPath();
+        ctx.arc(midX, midY, 14, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        ctx.fill();
+        
+        // Draw weight text
+        ctx.shadowColor = "#00efa6";
+        ctx.shadowBlur = 5;
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillText(edge.weight, midX, midY);
+        ctx.shadowBlur = 0;
+      }
+      
+      // Step 4: Draw all nodes (on top of everything)
       for (let node of nodes) {
         ctx.beginPath();
         ctx.arc(node.x, node.y, 22, 0, Math.PI * 2);
@@ -310,51 +344,96 @@
     }
 
     function runPrims() {
-      if (nodes.length === 0 || edges.length === 0) return;
+      if (nodes.length === 0 || edges.length === 0) {
+        alert("Please generate nodes and add edges first");
+        return;
+      }
+
+      // Clear previous MST
+      mstEdges = [];
+      
+      // Make the table visible
+      document.getElementById("logTable").style.display = "table";
+      logTable.innerHTML = '';
 
       const visited = new Set();
-      const pq = [];
+      const pq = []; // Priority queue to store edges
+      
+      // Start with node 0 (which is displayed as node 1)
       visited.add(0);
       let step = 1;
 
+      // Add all edges from the first node to the priority queue
       for (let edge of edges) {
         if (edge.from === 0 || edge.to === 0) {
           pq.push(edge);
         }
       }
 
+      // Sort by weight
       pq.sort((a, b) => a.weight - b.weight);
 
+      // Add a row for the initial state
+      const initialRow = document.createElement("tr");
+      initialRow.innerHTML = `
+        <td>${step++}</td>
+        <td>1</td>
+        <td>${pq.map(e => formatEdge(e)).join(", ")}</td>
+        <td>-</td>
+        <td>-</td>
+      `;
+      logTable.appendChild(initialRow);
+
+      // Run Prim's algorithm
       while (visited.size < nodes.length && pq.length > 0) {
         const edge = pq.shift();
+        
+        // Skip if both ends are already in the MST
         if (visited.has(edge.from) && visited.has(edge.to)) continue;
 
+        // Add edge to MST
         mstEdges.push(edge);
 
+        // Determine which node is new
         const newNode = visited.has(edge.from) ? edge.to : edge.from;
         visited.add(newNode);
 
+        // Find all edges connected to the new node
+        const availableEdges = [];
         for (let e of edges) {
           if ((e.from === newNode && !visited.has(e.to)) || (e.to === newNode && !visited.has(e.from))) {
             pq.push(e);
+            availableEdges.push(e);
           }
         }
 
+        // Sort by weight
         pq.sort((a, b) => a.weight - b.weight);
 
+        // Add a row to the log table
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${step++}</td>
-          <td>${newNode}</td>
-          <td>${pq.map(e => e.toString()).join(", ")}</td>
-          <td>${edge.toString()}</td>
-          <td>${mstEdges.map(e => e.toString()).join(", ")}</td>
+          <td>${newNode + 1}</td>
+          <td>${pq.map(e => formatEdge(e)).join(", ")}</td>
+          <td>${formatEdge(edge)}</td>
+          <td>${mstEdges.map(e => formatEdge(e)).join(", ")}</td>
         `;
         logTable.appendChild(row);
       }
 
       drawGraph();
     }
+
+    // Helper function to format edge display with 1-based indexing
+    function formatEdge(edge) {
+      return `(${edge.from + 1}-${edge.to + 1}, w:${edge.weight})`;
+    }
+
+    // Initial page load - hide the table
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("logTable").style.display = "none";
+    });
   </script>
 </body>
 </html>
