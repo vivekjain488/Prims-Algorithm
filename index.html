@@ -76,6 +76,14 @@
       box-shadow: 0 5px 15px rgba(0, 239, 166, 0.4);
     }
 
+    button:disabled {
+      background-color: #555;
+      color: #999;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
     label {
       color: #00efa6;
       font-weight: bold;
@@ -138,7 +146,6 @@
       color: #aaa;
     }
 
-    /* Add this to your existing styles */
     #logTable {
       display: none;
       margin-top: 30px;
@@ -155,27 +162,200 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    .explanation-panel {
+      display: none;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #00efa6;
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+      width: 760px;
+      max-height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(0, 239, 166, 0.3);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .explanation-title {
+      color: #00efa6;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      text-align: center;
+      border-bottom: 1px solid #00efa6;
+      padding-bottom: 10px;
+    }
+
+    .explanation-content {
+      line-height: 1.6;
+    }
+
+    .highlight {
+      color: #00efa6;
+      font-weight: bold;
+    }
+
+    .controls-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .step-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .step-controls button {
+      padding: 10px 20px;
+    }
+
+    .tutorial-section {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 30px;
+      width: 800px;
+      border: 1px solid #00efa6;
+      box-shadow: 0 0 20px rgba(0, 239, 166, 0.2);
+    }
+
+    .tutorial-title {
+      color: #00efa6;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .tutorial-content {
+      line-height: 1.7;
+    }
+
+    .tutorial-step {
+      margin-bottom: 15px;
+      padding-left: 20px;
+      border-left: 3px solid #00efa6;
+    }
+
+    .tutorial-step-title {
+      color: #00efa6;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .status-panel {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      width: 800px;
+      text-align: center;
+      border: 1px solid #00efa6;
+      box-shadow: 0 0 15px rgba(0, 239, 166, 0.2);
+      display: none;
+    }
+
+    .status-title {
+      color: #00efa6;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .status-content {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .status-item {
+      background: rgba(0, 239, 166, 0.1);
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 239, 166, 0.3);
+    }
+
+    .blink {
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .mst-weight {
+      font-size: 1.2rem;
+      color: #00efa6;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: center;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <h1>Prim's Algorithm Visualizer</h1>
-  <div class="controls">
-    <label for="nodeCount">Nodes:</label>
-    <input type="number" id="nodeCount" min="2" max="15" value="6" />
-    <button onclick="generateGraph()">Generate Nodes</button>
+  
+  <div class="controls-container">
+    <div class="controls">
+      <label for="nodeCount">Nodes:</label>
+      <input type="number" id="nodeCount" min="2" max="15" value="6" />
+      <button onclick="generateGraph()">Generate Nodes</button>
+    </div>
+    <div class="edge-inputs">
+      <input type="number" id="fromNode" placeholder="From" min="1" />
+      <input type="number" id="toNode" placeholder="To" min="1" />
+      <input type="number" id="weight" placeholder="Weight" min="1" />
+      <button onclick="addEdge()">Add Edge</button>
+      <button onclick="clearGraph()">Clear All</button>
+    </div>
+    <div class="run-prims">
+      <button id="runPrimsBtn" onclick="startPrimsTutorial()">Run Prim's Algorithm</button>
+    </div>
   </div>
-  <div class="edge-inputs">
-    <input type="number" id="fromNode" placeholder="From" min="0" />
-    <input type="number" id="toNode" placeholder="To" min="0" />
-    <input type="number" id="weight" placeholder="Weight" min="1" />
-    <button onclick="addEdge()">Add Edge</button>
-    <!-- <button onclick="drawGraph()">Draw Graph</button> -->
-  </div>
-  <div class="run-prims">
-    <button onclick="runPrims()">Run Prim's Algorithm</button>
+
+  <div class="status-panel" id="statusPanel">
+    <div class="status-title">Algorithm Status</div>
+    <div class="status-content">
+      <div class="status-item">Current Step: <span id="currentStep">-</span></div>
+      <div class="status-item">Visited Nodes: <span id="visitedNodes">-</span></div>
+      <div class="status-item">Edges in MST: <span id="mstEdgesCount">0</span></div>
+      <div class="status-item">Total Weight: <span id="totalWeight">0</span></div>
+    </div>
   </div>
 
   <canvas id="graphCanvas" width="800" height="500"></canvas>
+
+  <div class="step-controls" id="stepControls" style="display: none;">
+    <button onclick="previousStep()" id="prevStepBtn" disabled>< Previous Step</button>
+    <button onclick="nextStep()" id="nextStepBtn">Next Step ></button>
+    <button onclick="completeAlgorithm()" id="completeBtn">Complete Algorithm</button>
+  </div>
+
+  <div class="explanation-panel" id="explanationPanel">
+    <div class="explanation-title" id="explanationTitle">Welcome to Prim's Algorithm Visualizer</div>
+    <div class="explanation-content" id="explanationContent">
+      Prim's algorithm is a greedy algorithm that finds a minimum spanning tree for a weighted undirected graph. 
+      This means it finds a subset of the edges that forms a tree that includes every vertex, where the total 
+      weight of all the edges in the tree is minimized.
+    </div>
+  </div>
+
+  <div class="mst-weight" id="mstWeight"></div>
 
   <table id="logTable">
     <thead>
@@ -187,16 +367,54 @@
         <th>MST So Far</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="logTableBody"></tbody>
   </table>
+
+  <div class="tutorial-section">
+    <div class="tutorial-title">How to Use This Visualizer</div>
+    <div class="tutorial-content">
+      <div class="tutorial-step">
+        <div class="tutorial-step-title">Step 1: Create Your Graph</div>
+        <p>Start by specifying the number of nodes (between 2 and 15) and click "Generate Nodes". 
+        Then add edges by specifying the "From" node, "To" node, and the weight of the edge.</p>
+      </div>
+      <div class="tutorial-step">
+        <div class="tutorial-step-title">Step 2: Run Prim's Algorithm</div>
+        <p>Click "Run Prim's Algorithm" to start the visualization. The algorithm will find the 
+        Minimum Spanning Tree (MST) step by step.</p>
+      </div>
+      <div class="tutorial-step">
+        <div class="tutorial-step-title">Step 3: Follow Along</div>
+        <p>Use the "Next Step" and "Previous Step" buttons to navigate through the algorithm. 
+        The explanation panel will describe what's happening at each step.</p>
+      </div>
+      <div class="tutorial-step">
+        <div class="tutorial-step-title">Understanding Prim's Algorithm</div>
+        <p>Prim's algorithm works by starting at an arbitrary node and repeatedly adding the 
+        cheapest edge that connects a node in the MST to a node outside the MST until all nodes are included.</p>
+      </div>
+    </div>
+  </div>
 
   <script>
     const canvas = document.getElementById("graphCanvas");
     const ctx = canvas.getContext("2d");
-    const logTable = document.getElementById("logTable").querySelector("tbody");
+    const logTable = document.getElementById("logTable");
+    const logTableBody = document.getElementById("logTableBody");
+    const explanationPanel = document.getElementById("explanationPanel");
+    const explanationTitle = document.getElementById("explanationTitle");
+    const explanationContent = document.getElementById("explanationContent");
+    const statusPanel = document.getElementById("statusPanel");
+    const stepControls = document.getElementById("stepControls");
+    const runPrimsBtn = document.getElementById("runPrimsBtn");
+    const mstWeight = document.getElementById("mstWeight");
+
     let nodes = [];
     let edges = [];
     let mstEdges = [];
+    let algorithmSteps = [];
+    let currentStepIndex = 0;
+    let isAlgorithmRunning = false;
 
     class Node {
       constructor(x, y, id) {
@@ -214,7 +432,18 @@
       }
 
       toString() {
-        return `(${this.from}-${this.to}, w:${this.weight})`;
+        return `(${this.from + 1}-${this.to + 1}, w:${this.weight})`;
+      }
+    }
+
+    class AlgorithmStep {
+      constructor(currentNode, availableEdges, chosenEdge, mstEdges, visitedNodes, explanation) {
+        this.currentNode = currentNode;
+        this.availableEdges = [...availableEdges];
+        this.chosenEdge = chosenEdge ? {...chosenEdge} : null;
+        this.mstEdges = [...mstEdges];
+        this.visitedNodes = new Set(visitedNodes);
+        this.explanation = explanation;
       }
     }
 
@@ -225,8 +454,20 @@
       nodes = [];
       edges = [];
       mstEdges = [];
+      algorithmSteps = [];
+      currentStepIndex = 0;
+      isAlgorithmRunning = false;
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      logTable.innerHTML = '';
+      logTableBody.innerHTML = '';
+      explanationPanel.style.display = 'none';
+      statusPanel.style.display = 'none';
+      stepControls.style.display = 'none';
+      mstWeight.style.display = 'none';
+      logTable.style.display = 'none';
+      
+      runPrimsBtn.textContent = "Run Prim's Algorithm";
+      runPrimsBtn.disabled = false;
 
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
@@ -239,200 +480,510 @@
         nodes.push(new Node(x, y, i + 1));
       }
 
+      updateExplanation(
+        "Graph Created", 
+        `A graph with ${nodeCount} nodes has been created. Now you can add edges between these nodes. 
+        Remember that in graph theory, nodes are connected by edges with weights representing the cost 
+        or distance between them.`
+      );
+      
       drawGraph();
+    }
+
+    function clearGraph() {
+      nodes = [];
+      edges = [];
+      mstEdges = [];
+      algorithmSteps = [];
+      currentStepIndex = 0;
+      isAlgorithmRunning = false;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      logTableBody.innerHTML = '';
+      explanationPanel.style.display = 'none';
+      statusPanel.style.display = 'none';
+      stepControls.style.display = 'none';
+      mstWeight.style.display = 'none';
+      logTable.style.display = 'none';
+      
+      runPrimsBtn.textContent = "Run Prim's Algorithm";
+      runPrimsBtn.disabled = false;
+      
+      document.getElementById("nodeCount").value = 6;
+      document.getElementById("fromNode").value = '';
+      document.getElementById("toNode").value = '';
+      document.getElementById("weight").value = '';
+      
+      updateExplanation(
+        "Graph Cleared", 
+        "The graph has been cleared. You can now create a new graph by specifying the number of nodes and adding edges."
+      );
     }
 
     function addEdge() {
       const from = parseInt(document.getElementById("fromNode").value);
       const to = parseInt(document.getElementById("toNode").value);
       const weight = parseInt(document.getElementById("weight").value);
-    if (
+      
+      if (
         isNaN(from) || isNaN(to) || isNaN(weight) || 
         from === to || 
         from < 1 || to < 1 || 
         from > nodes.length || to > nodes.length
       ) {
-        alert("Invalid edge input");
+        alert("Invalid edge input. Please check:\n1. Both nodes must be between 1 and " + nodes.length + "\n2. Nodes cannot be the same\n3. Weight must be a positive number");
         return;
       }
-      edges.push(new Edge(from - 1, to - 1, weight));
+      
+      // Check if edge already exists
+      const fromIndex = from - 1;
+      const toIndex = to - 1;
+      const edgeExists = edges.some(e => 
+        (e.from === fromIndex && e.to === toIndex) || 
+        (e.from === toIndex && e.to === fromIndex)
+      );
+      
+      if (edgeExists) {
+        alert("An edge between these nodes already exists!");
+        return;
+      }
+      
+      edges.push(new Edge(fromIndex, toIndex, weight));
+      
+      updateExplanation(
+        "Edge Added", 
+        `Added edge between node ${from} and node ${to} with weight ${weight}. 
+        You can continue adding more edges or run Prim's algorithm when ready.`
+      );
+      
       drawGraph();
+      
+      // Clear input fields
+      document.getElementById("fromNode").value = '';
+      document.getElementById("toNode").value = '';
+      document.getElementById("weight").value = '';
     }
+
     function drawGraph() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Step 1: First draw all regular edges (lines only)
+      // Draw all edges first
       for (let edge of edges) {
         const fromNode = nodes[edge.from];
         const toNode = nodes[edge.to];
-        const gradient = ctx.createLinearGradient(fromNode.x, fromNode.y, toNode.x, toNode.y);
-        gradient.addColorStop(0, "rgba(0, 239, 166, 0.3)");
-        gradient.addColorStop(0.5, "rgba(0, 239, 166, 0.5)");
-        gradient.addColorStop(1, "rgba(0, 239, 166, 0.3)");
+        const isInMST = mstEdges.some(e => 
+          (e.from === edge.from && e.to === edge.to) || 
+          (e.from === edge.to && e.to === edge.from)
+        );
         
-        ctx.beginPath();
-        ctx.moveTo(fromNode.x, fromNode.y);
-        ctx.lineTo(toNode.x, toNode.y);
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 5;
-        ctx.stroke();
-      }
-      
-      // Step 2: Draw all MST edges (lines only)
-      for (let edge of mstEdges) {
-        const fromNode = nodes[edge.from];
-        const toNode = nodes[edge.to];
-        const gradient = ctx.createLinearGradient(fromNode.x, fromNode.y, toNode.x, toNode.y);
-        gradient.addColorStop(0, "#00efa6");
-        gradient.addColorStop(0.5, "#00ffc3");
-        gradient.addColorStop(1, "#00efa6");
-        ctx.shadowColor = "#00efa6";
-        ctx.shadowBlur = 15;
-        ctx.beginPath();
-        ctx.moveTo(fromNode.x, fromNode.y);
-        ctx.lineTo(toNode.x, toNode.y);
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
-      
-      // Step 3: Draw all weight labels (on top of lines)
-      for (let edge of edges) {
-        const fromNode = nodes[edge.from];
-        const toNode = nodes[edge.to];
+        if (isInMST) {
+          // Draw MST edges with highlight
+          const gradient = ctx.createLinearGradient(fromNode.x, fromNode.y, toNode.x, toNode.y);
+          gradient.addColorStop(0, "#00efa6");
+          gradient.addColorStop(0.5, "#00ffc3");
+          gradient.addColorStop(1, "#00efa6");
+          ctx.shadowColor = "#00efa6";
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.moveTo(fromNode.x, fromNode.y);
+          ctx.lineTo(toNode.x, toNode.y);
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 4;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        } else {
+          // Draw regular edges
+          const gradient = ctx.createLinearGradient(fromNode.x, fromNode.y, toNode.x, toNode.y);
+          gradient.addColorStop(0, "rgba(0, 239, 166, 0.3)");
+          gradient.addColorStop(0.5, "rgba(0, 239, 166, 0.5)");
+          gradient.addColorStop(1, "rgba(0, 239, 166, 0.3)");
+          ctx.beginPath();
+          ctx.moveTo(fromNode.x, fromNode.y);
+          ctx.lineTo(toNode.x, toNode.y);
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+        
+        // Draw weight label
         const midX = (fromNode.x + toNode.x) / 2;
         const midY = (fromNode.y + toNode.y) / 2;
         
-        // Draw weight background for better readability
         ctx.beginPath();
         ctx.arc(midX, midY, 14, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        ctx.fillStyle = isInMST ? "rgba(0, 239, 166, 0.8)" : "rgba(0, 0, 0, 0.8)";
         ctx.fill();
         
-        // Draw weight text
-        ctx.shadowColor = "#00efa6";
-        ctx.shadowBlur = 5;
-        ctx.fillStyle = "white";
+        ctx.fillStyle = isInMST ? "black" : "white";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = "bold 14px sans-serif";
         ctx.fillText(edge.weight, midX, midY);
-        ctx.shadowBlur = 0;
       }
       
-      // Step 4: Draw all nodes (on top of everything)
+      // Draw all nodes
       for (let node of nodes) {
+        const isVisited = isAlgorithmRunning && algorithmSteps[currentStepIndex].visitedNodes.has(node.id - 1);
+        
+        // Node outer glow if visited
+        if (isVisited) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 30, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(0, 239, 166, 0.2)";
+          ctx.fill();
+        }
+        
+        // Node main circle
         ctx.beginPath();
         ctx.arc(node.x, node.y, 22, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 239, 166, 0.2)";
+        ctx.fillStyle = isVisited ? "rgba(0, 239, 166, 0.5)" : "rgba(0, 239, 166, 0.2)";
         ctx.fill();
+        
         ctx.beginPath();
         ctx.arc(node.x, node.y, 20, 0, Math.PI * 2);
-        ctx.fillStyle = "#00efa6";
+        ctx.fillStyle = isVisited ? "#00efa6" : "#00d696";
         ctx.fill();
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, 18, 0, Math.PI * 2);
-        ctx.fillStyle = "#00d696";
-        ctx.fill();
+        
+        // Node ID
         ctx.fillStyle = "black";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = "bold 14px sans-serif";
         ctx.fillText(node.id, node.x, node.y);
+        
+        // Highlight current node
+        if (isAlgorithmRunning && algorithmSteps[currentStepIndex].currentNode === node.id - 1) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 26, 0, Math.PI * 2);
+          ctx.strokeStyle = "#00efa6";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+      }
+      
+      // Highlight chosen edge if in algorithm mode
+      if (isAlgorithmRunning && algorithmSteps[currentStepIndex].chosenEdge) {
+        const chosenEdge = algorithmSteps[currentStepIndex].chosenEdge;
+        const fromNode = nodes[chosenEdge.from];
+        const toNode = nodes[chosenEdge.to];
+        
+        ctx.beginPath();
+        ctx.moveTo(fromNode.x, fromNode.y);
+        ctx.lineTo(toNode.x, toNode.y);
+        ctx.strokeStyle = "rgba(255, 255, 0, 0.7)";
+        ctx.lineWidth = 6;
+        ctx.stroke();
+        
+        // Pulse animation for chosen edge weight
+        const midX = (fromNode.x + toNode.x) / 2;
+        const midY = (fromNode.y + toNode.y) / 2;
+        
+        ctx.beginPath();
+        ctx.arc(midX, midY, 18, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255, 255, 0, 0.8)";
+        ctx.fill();
+        
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillText(chosenEdge.weight, midX, midY);
       }
     }
 
-    function runPrims() {
+    function startPrimsTutorial() {
       if (nodes.length === 0 || edges.length === 0) {
         alert("Please generate nodes and add edges first");
         return;
       }
-
-      // Clear previous MST
-      mstEdges = [];
       
-      // Make the table visible
-      document.getElementById("logTable").style.display = "table";
-      logTable.innerHTML = '';
+      if (nodes.length > 1 && edges.length < nodes.length - 1) {
+        alert("For a connected graph with " + nodes.length + " nodes, you need at least " + (nodes.length - 1) + " edges.");
+        return;
+      }
+      
+      runPrimsBtn.textContent = "Running Prim's Algorithm...";
+      runPrimsBtn.disabled = true;
+      
+      updateExplanation(
+        "Prim's Algorithm Started", 
+        "Prim's algorithm is a greedy algorithm that finds a minimum spanning tree for a weighted undirected graph. " +
+        "It starts at an arbitrary node and grows the MST by adding the cheapest edge that connects a node in the MST to a node outside the MST."
+      );
+      
+      setTimeout(() => {
+        runPrims();
+      }, 1500);
+    }
 
+    function runPrims() {
+      // Clear previous MST and algorithm steps
+      mstEdges = [];
+      algorithmSteps = [];
+      currentStepIndex = 0;
+      isAlgorithmRunning = true;
+      
+      logTableBody.innerHTML = '';
+      logTable.style.display = 'table';
+      statusPanel.style.display = 'block';
+      stepControls.style.display = 'flex';
+      
       const visited = new Set();
       const pq = []; // Priority queue to store edges
       
       // Start with node 0 (which is displayed as node 1)
       visited.add(0);
-      let step = 1;
-
+      
+      // Add initial explanation step
+      algorithmSteps.push(new AlgorithmStep(
+        0,
+        [],
+        null,
+        [],
+        visited,
+        `Starting Prim's algorithm from node 1. We'll begin by examining all edges connected to this node.`
+      ));
+      
       // Add all edges from the first node to the priority queue
       for (let edge of edges) {
         if (edge.from === 0 || edge.to === 0) {
           pq.push(edge);
         }
       }
-
+      
       // Sort by weight
       pq.sort((a, b) => a.weight - b.weight);
-
-      // Add a row for the initial state
-      const initialRow = document.createElement("tr");
-      initialRow.innerHTML = `
-        <td>${step++}</td>
-        <td>1</td>
-        <td>${pq.map(e => formatEdge(e)).join(", ")}</td>
-        <td>-</td>
-        <td>-</td>
-      `;
-      logTable.appendChild(initialRow);
-
+      
+      // Add initial step to algorithm and log table
+      addStepToLogTable(0, 1, pq, null, []);
+      algorithmSteps.push(new AlgorithmStep(
+        0,
+        pq,
+        null,
+        [],
+        visited,
+        `After adding edges from node 1, we have these candidate edges to consider: ${pq.map(e => e.toString()).join(', ')}. ` +
+        `We'll always pick the edge with the smallest weight next.`
+      ));
+      
       // Run Prim's algorithm
       while (visited.size < nodes.length && pq.length > 0) {
         const edge = pq.shift();
         
         // Skip if both ends are already in the MST
-        if (visited.has(edge.from) && visited.has(edge.to)) continue;
-
+        if (visited.has(edge.from) && visited.has(edge.to)) {
+          addStepToLogTable(algorithmSteps.length, edge.from + 1, pq, null, mstEdges);
+          algorithmSteps.push(new AlgorithmStep(
+            edge.from,
+            pq,
+            null,
+            mstEdges,
+            visited,
+            `Skipping edge ${edge.toString()} because both nodes are already in the MST.`
+          ));
+          continue;
+        }
+        
         // Add edge to MST
         mstEdges.push(edge);
-
+        
         // Determine which node is new
         const newNode = visited.has(edge.from) ? edge.to : edge.from;
         visited.add(newNode);
-
+        
+        // Add step for chosen edge to log table
+        addStepToLogTable(algorithmSteps.length, newNode + 1, pq, edge, mstEdges);
+        algorithmSteps.push(new AlgorithmStep(
+          newNode,
+          pq,
+          edge,
+          mstEdges,
+          visited,
+          `Adding edge ${edge.toString()} to the MST. This connects node ${newNode + 1} to the tree. ` +
+          `The total weight of the MST is now ${calculateMSTWeight()}.`
+        ));
+        
         // Find all edges connected to the new node
-        const availableEdges = [];
+        const newEdges = [];
         for (let e of edges) {
           if ((e.from === newNode && !visited.has(e.to)) || (e.to === newNode && !visited.has(e.from))) {
             pq.push(e);
-            availableEdges.push(e);
+            newEdges.push(e);
           }
         }
-
-        // Sort by weight
-        pq.sort((a, b) => a.weight - b.weight);
-
-        // Add a row to the log table
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${step++}</td>
-          <td>${newNode + 1}</td>
-          <td>${pq.map(e => formatEdge(e)).join(", ")}</td>
-          <td>${formatEdge(edge)}</td>
-          <td>${mstEdges.map(e => formatEdge(e)).join(", ")}</td>
-        `;
-        logTable.appendChild(row);
+        
+        if (newEdges.length > 0) {
+          // Sort by weight
+          pq.sort((a, b) => a.weight - b.weight);
+          
+          // Add step showing new candidate edges
+          addStepToLogTable(algorithmSteps.length, newNode + 1, pq, null, mstEdges);
+          algorithmSteps.push(new AlgorithmStep(
+            newNode,
+            pq,
+            null,
+            mstEdges,
+            visited,
+            `Now examining edges from node ${newNode + 1}. We've added these new candidate edges: ` +
+            `${newEdges.map(e => e.toString()).join(', ')}. The current candidate edges are: ${pq.map(e => e.toString()).join(', ')}.`
+          ));
+        } else if (pq.length > 0) {
+          addStepToLogTable(algorithmSteps.length, newNode + 1, pq, null, mstEdges);
+          algorithmSteps.push(new AlgorithmStep(
+            newNode,
+            pq,
+            null,
+            mstEdges,
+            visited,
+            `Node ${newNode + 1} has no new edges to add. Current candidate edges are: ${pq.map(e => e.toString()).join(', ')}.`
+          ));
+        }
       }
+      
+      // Add final completion step
+      if (visited.size === nodes.length) {
+        addStepToLogTable(algorithmSteps.length, "-", [], null, mstEdges);
+        algorithmSteps.push(new AlgorithmStep(
+          null,
+          [],
+          null,
+          mstEdges,
+          visited,
+          `Algorithm complete! We've connected all ${nodes.length} nodes with ${mstEdges.length} edges. ` +
+          `The total weight of the Minimum Spanning Tree is ${calculateMSTWeight()}.`
+        ));
+      } else {
+        addStepToLogTable(algorithmSteps.length, "-", [], null, mstEdges);
+        algorithmSteps.push(new AlgorithmStep(
+          null,
+          [],
+          null,
+          mstEdges,
+          visited,
+          `Algorithm stopped. The graph might be disconnected as we couldn't reach all nodes. ` +
+          `Connected ${visited.size} nodes with ${mstEdges.length} edges. Total weight: ${calculateMSTWeight()}.`
+        ));
+      }
+      
+      // Initialize UI for stepping through algorithm
+      currentStepIndex = 0;
+      updateStepDisplay();
+    }
 
+    function addStepToLogTable(stepNumber, currentNode, availableEdges, chosenEdge, mstEdges) {
+      const row = document.createElement("tr");
+      
+      // Highlight the current step row
+      if (stepNumber === currentStepIndex) {
+        row.style.backgroundColor = "rgba(0, 239, 166, 0.2)";
+      }
+      
+      row.innerHTML = `
+        <td>${stepNumber}</td>
+        <td>${currentNode}</td>
+        <td>${availableEdges.map(e => e.toString()).join(', ')}</td>
+        <td>${chosenEdge ? chosenEdge.toString() : '-'}</td>
+        <td>${mstEdges.map(e => e.toString()).join(', ')}</td>
+      `;
+      
+      logTableBody.appendChild(row);
+    }
+
+    function calculateMSTWeight() {
+      return mstEdges.reduce((sum, edge) => sum + edge.weight, 0);
+    }
+
+    function updateStepDisplay() {
+      if (currentStepIndex >= algorithmSteps.length) return;
+      
+      const step = algorithmSteps[currentStepIndex];
+      
+      // Update MST edges for display
+      mstEdges = step.mstEdges ? [...step.mstEdges] : [];
+      
+      // Update status panel
+      document.getElementById("currentStep").textContent = `${currentStepIndex + 1}/${algorithmSteps.length}`;
+      document.getElementById("visitedNodes").textContent = step.visitedNodes ? Array.from(step.visitedNodes).map(n => n + 1).join(', ') : '-';
+      document.getElementById("mstEdgesCount").textContent = mstEdges.length;
+      document.getElementById("totalWeight").textContent = calculateMSTWeight();
+      
+      // Update explanation panel
+      updateExplanation(
+        `Step ${currentStepIndex + 1} of ${algorithmSteps.length}`,
+        step.explanation
+      );
+      
+      // Update button states
+      document.getElementById("prevStepBtn").disabled = currentStepIndex === 0;
+      document.getElementById("nextStepBtn").disabled = currentStepIndex === algorithmSteps.length - 1;
+      
+      // Show MST weight when complete
+      if (currentStepIndex === algorithmSteps.length - 1) {
+        mstWeight.textContent = `Minimum Spanning Tree Total Weight: ${calculateMSTWeight()}`;
+        mstWeight.style.display = 'block';
+        mstWeight.classList.add('pulse');
+      } else {
+        mstWeight.style.display = 'none';
+        mstWeight.classList.remove('pulse');
+      }
+      
+      // Update log table highlighting
+      const rows = logTableBody.querySelectorAll("tr");
+      rows.forEach((row, index) => {
+        if (index === currentStepIndex) {
+          row.style.backgroundColor = "rgba(0, 239, 166, 0.2)";
+        } else {
+          row.style.backgroundColor = "";
+        }
+      });
+      
       drawGraph();
     }
 
-    // Helper function to format edge display with 1-based indexing
-    function formatEdge(edge) {
-      return `(${edge.from + 1}-${edge.to + 1}, w:${edge.weight})`;
+    function previousStep() {
+      if (currentStepIndex > 0) {
+        currentStepIndex--;
+        updateStepDisplay();
+      }
     }
 
-    // Initial page load - hide the table
+    function nextStep() {
+      if (currentStepIndex < algorithmSteps.length - 1) {
+        currentStepIndex++;
+        updateStepDisplay();
+      }
+    }
+
+    function completeAlgorithm() {
+      currentStepIndex = algorithmSteps.length - 1;
+      updateStepDisplay();
+    }
+
+    function updateExplanation(title, content) {
+      explanationTitle.textContent = title;
+      explanationContent.innerHTML = content;
+      explanationPanel.style.display = 'block';
+      
+      // Auto-scroll to explanation
+      setTimeout(() => {
+        explanationPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+
+    // Initial page load
     document.addEventListener("DOMContentLoaded", function() {
-      document.getElementById("logTable").style.display = "none";
+      logTable.style.display = "none";
+      explanationPanel.style.display = "none";
+      statusPanel.style.display = "none";
+      stepControls.style.display = "none";
+      mstWeight.style.display = "none";
+      
+      updateExplanation(
+        "Welcome to Prim's Algorithm Visualizer", 
+        "This interactive tool helps you understand how Prim's algorithm works to find a Minimum Spanning Tree (MST) in a graph. " +
+        "To get started, create a graph by specifying the number of nodes and adding edges between them with weights. " +
+        "Then click 'Run Prim's Algorithm' to see the step-by-step process."
+      );
     });
   </script>
 </body>
