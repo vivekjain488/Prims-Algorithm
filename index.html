@@ -36,8 +36,12 @@
       background-color: rgba(0, 0, 0, 0.4);
       padding: 20px;
       border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 239, 166, 0.2);
       border: 1px solid rgba(0, 239, 166, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .controls:hover, .edge-inputs:hover, .run-prims:hover {
+      background-color: rgba(0, 0, 0, 0.5);
     }
 
     input[type="number"] {
@@ -53,7 +57,8 @@
 
     input[type="number"]:focus {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(0, 239, 166, 0.3);
+      border-color: #00ffc3;
+      background-color: rgba(0, 0, 0, 0.9);
     }
 
     button {
@@ -61,27 +66,51 @@
       font-size: 16px;
       border: none;
       border-radius: 8px;
-      background-color: #00efa6;
+      background: linear-gradient(145deg, #00efa6, #00c288);
       color: black;
       cursor: pointer;
       transition: all 0.3s ease;
       font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
     }
 
     button:hover {
-      background-color: #00c288;
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 239, 166, 0.4);
+      background: linear-gradient(145deg, #00ffc3, #00efa6);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    button:hover::after {
+      transform: translateX(100%);
     }
 
     button:disabled {
-      background-color: #555;
+      background: linear-gradient(145deg, #444, #333);
       color: #999;
       cursor: not-allowed;
       transform: none;
-      box-shadow: none;
+    }
+
+    button:disabled::after {
+      display: none;
     }
 
     label {
@@ -93,7 +122,6 @@
       border: 3px solid #00efa6;
       background: #121212;
       margin-top: 30px;
-      box-shadow: 0 0 30px rgba(0, 239, 166, 0.3);
       border-radius: 10px;
     }
 
@@ -101,7 +129,6 @@
       margin-top: 30px;
       border-collapse: collapse;
       background: rgba(0, 0, 0, 0.6);
-      box-shadow: 0 0 20px rgba(0, 239, 166, 0.2);
       border-radius: 10px;
       overflow: hidden;
       width: 800px;
@@ -135,7 +162,7 @@
     }
 
     .run-prims button {
-      background-color: #00efa6;
+      background: linear-gradient(145deg, #00efa6, #00c288);
       color: black;
       padding: 15px 30px;
       font-size: 18px;
@@ -151,7 +178,6 @@
       margin-top: 30px;
       border-collapse: collapse;
       background: rgba(0, 0, 0, 0.6);
-      box-shadow: 0 0 20px rgba(0, 239, 166, 0.2);
       border-radius: 10px;
       overflow: hidden;
       width: 800px;
@@ -173,7 +199,6 @@
       width: 760px;
       max-height: 300px;
       overflow-y: auto;
-      box-shadow: 0 0 20px rgba(0, 239, 166, 0.3);
       animation: fadeIn 0.5s ease-in-out;
     }
 
@@ -210,6 +235,15 @@
 
     .step-controls button {
       padding: 10px 20px;
+      background: linear-gradient(145deg, #222, #333);
+      border: 1px solid #00efa6;
+      color: #00efa6;
+    }
+
+    .step-controls button:hover:not(:disabled) {
+      background: linear-gradient(145deg, #333, #444);
+      border-color: #00ffc3;
+      color: #00ffc3;
     }
 
     .tutorial-section {
@@ -219,7 +253,6 @@
       margin-top: 30px;
       width: 800px;
       border: 1px solid #00efa6;
-      box-shadow: 0 0 20px rgba(0, 239, 166, 0.2);
     }
 
     .tutorial-title {
@@ -237,6 +270,12 @@
       margin-bottom: 15px;
       padding-left: 20px;
       border-left: 3px solid #00efa6;
+      transition: all 0.3s ease;
+    }
+
+    .tutorial-step:hover {
+      background: rgba(0, 239, 166, 0.05);
+      border-left-width: 5px;
     }
 
     .tutorial-step-title {
@@ -253,7 +292,6 @@
       width: 800px;
       text-align: center;
       border: 1px solid #00efa6;
-      box-shadow: 0 0 15px rgba(0, 239, 166, 0.2);
       display: none;
     }
 
@@ -304,6 +342,9 @@
       margin-top: 20px;
       text-align: center;
       display: none;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 8px;
+      padding: 10px 20px;
     }
   </style>
 </head>
@@ -582,15 +623,12 @@
           gradient.addColorStop(0, "#00efa6");
           gradient.addColorStop(0.5, "#00ffc3");
           gradient.addColorStop(1, "#00efa6");
-          ctx.shadowColor = "#00efa6";
-          ctx.shadowBlur = 15;
           ctx.beginPath();
           ctx.moveTo(fromNode.x, fromNode.y);
           ctx.lineTo(toNode.x, toNode.y);
           ctx.strokeStyle = gradient;
           ctx.lineWidth = 4;
           ctx.stroke();
-          ctx.shadowBlur = 0;
         } else {
           // Draw regular edges
           const gradient = ctx.createLinearGradient(fromNode.x, fromNode.y, toNode.x, toNode.y);
@@ -604,10 +642,18 @@
           ctx.lineWidth = 3;
           ctx.stroke();
         }
-        
-        // Draw weight label
+      }
+      
+      // Draw weight labels on top of edges
+      for (let edge of edges) {
+        const fromNode = nodes[edge.from];
+        const toNode = nodes[edge.to];
         const midX = (fromNode.x + toNode.x) / 2;
         const midY = (fromNode.y + toNode.y) / 2;
+        const isInMST = mstEdges.some(e => 
+          (e.from === edge.from && e.to === edge.to) || 
+          (e.from === edge.to && e.to === edge.from)
+        );
         
         ctx.beginPath();
         ctx.arc(midX, midY, 14, 0, Math.PI * 2);
@@ -674,7 +720,7 @@
         ctx.lineWidth = 6;
         ctx.stroke();
         
-        // Pulse animation for chosen edge weight
+        // Draw weight highlight for chosen edge
         const midX = (fromNode.x + toNode.x) / 2;
         const midY = (fromNode.y + toNode.y) / 2;
         
